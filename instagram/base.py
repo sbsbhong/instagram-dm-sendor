@@ -32,17 +32,11 @@ class InstagramService(metaclass=ABCMeta):
     def name(self) -> str:
         pass
 
-    def _wait(self):
-        time.sleep(self._timewait)
-    
-    def _wait_random_time(self):
-        time.sleep(self._timewait * (1 + random.random()))
-
     def _wait_loading(self):
         for _ in range(10):
             if self._context.execute_script("return document.readyState") == "complete":
                 break
-            self._wait_random_time()
+            self.wait_random_time()
     
     def _wait_element(self, value="", by: str=None, element: WebElement=None, ) -> None:
         if not element:
@@ -55,15 +49,21 @@ class InstagramService(metaclass=ABCMeta):
             EC.presence_of_element_located((by, value))
         )
 
-        self._wait_random_time()
+        self.wait_random_time()
 
     def _wait_redirection(self, origin_url: str) -> Union[None, str]:
         for _ in range(self._MAXIMUM_WAIT_LOOPS):
             if self._context.current_url != origin_url:
                 return self._context.current_url
-            self._wait()
+            self.wait()
         
         raise Exception(f"Redirection failed. Origin url: {origin_url}")
+
+    def wait(self):
+        time.sleep(self._timewait)
+
+    def wait_random_time(self):
+        time.sleep(self._timewait * (1 + random.random()))
     
     def open(self) -> Self:
         previous = self._context.current_url

@@ -77,15 +77,15 @@ class Instagram(InstagramService):
     
     def _login(self, id: str, password: str):
         self._wait_element('//*[@id="loginForm"]/div/div[1]/div/label/input')
-        self._wait_random_time()
+        self.wait_random_time()
 
         self._context.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[1]/div/label/input').send_keys(id)
         self._logger.debug("ID entered")
-        self._wait_random_time()
+        self.wait_random_time()
 
         self._context.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[2]/div/label/input').send_keys(password)
         self._logger.debug("Password entered")
-        self._wait_random_time()
+        self.wait_random_time()
 
         self._context.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[3]/button').click()
         self._logger.debug("Login button clicked")

@@ -1,6 +1,7 @@
 from typing import Self, Union, List
 from instagram.base import InstagramService
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 
 class DMRoom:
@@ -44,14 +45,20 @@ class DMRoom:
     @property
     def send_files_button(self) -> Union[WebElement, None]:
         try:
-            node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[3]'
-
+            node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[3]/div/div[2]/div[3]'
             if self.is_like_btn_exist:
-                node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]'
+                #node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[3]'
+                node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div[1]/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[3]'
                 #node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div[1]/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[3]'
+                #node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div[1]/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[3]'
+                #node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[3]
 
             return self._context.find_element(By.XPATH, node)
         except:
+            try:
+                return self._context.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div[1]/div/div/div/div[2]/div/div/div[2]/div/div[2]/div[3]')
+            except:
+                pass
             return None
         
     @property
@@ -119,7 +126,7 @@ class InstagramDM(InstagramService):
             if id and id.text == recipient_id:
                 self._logger.info("Recipient found")
                 is_found = True
-                self._wait_random_time()
+                self.wait_random_time()
                 id.click()
                 break
             
@@ -130,7 +137,7 @@ class InstagramDM(InstagramService):
         chat_btn = self.find_element(self._context, By.XPATH, '/html/body/div[6]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[4]/div')
 
         if chat_btn:
-            self._wait_random_time()
+            self.wait_random_time()
             chat_btn.click()
             self._logger.debug("Chat button clicked")
         else:
@@ -162,11 +169,15 @@ class InstagramDM(InstagramService):
         
         self.room.textbox.send_keys(message)
 
+        self.wait_random_time()
+        self.room.textbox.send_keys(Keys.ENTER)
+
+        """ self._wait_random_time()
         if not self.room.send_message_button:
             raise Exception("Send button not found")
         
         self._wait_random_time()
-        self.room.send_message_button.click()
+        self.room.send_message_button.click() """
 
         self._logger.info("Message sent")
 
@@ -177,18 +188,19 @@ class InstagramDM(InstagramService):
         if not self.room:
             raise Exception("DM room not found. Create a new message first.")
         
-        if not self.room.file_attach_input:
+        if not self.room.file_attach_input or not self.room.textbox:
             raise Exception("File attach input not found")
         
         self.room.file_attach_input.send_keys("\n".join(files))
 
+        self.wait_random_time()
         if not self.room.send_files_button:
             raise Exception("Send button not found")
         
-        self._wait_random_time()
+        self.wait_random_time()
         self.room.send_files_button.click()
 
-        self._logger.info("Message sent")
+        self._logger.info("Files sent")
 
         return self
     
