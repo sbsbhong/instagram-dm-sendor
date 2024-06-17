@@ -65,12 +65,22 @@ class Instagram(InstagramService):
         # 홈으로 리다이렉트 되면 알림을 허용할 것인지 묻는 모달이 뜬다.
         if redirected_url == self._routes.home:
             self._logger.debug("Notification modal is shown")
-            # 나중에 하기 버튼 클릭
-            notnow_btn = self._context.find_element(By.XPATH, "/html/body/div[3]/div[1]/div/div[2]/div/div/div/div/div[2]/div/div/div[3]/button[2]")
-            if notnow_btn:
-                notnow_btn.click()
-            else:
+            notnow_btn = None
+
+            for _ in range(60):
+                try:
+                    # 알림 허용 버튼 클릭
+                    notnow_btn = self._context.find_element(By.XPATH, "/html/body/div[3]/div[1]/div/div[2]/div/div/div/div/div[2]/div/div/div[3]/button[2]")
+                    # 나중에 하기 버튼 클릭
+                    notnow_btn.click()
+
+                    break
+                except:
+                    self.wait_random_time()
+
+            if notnow_btn is None:
                 raise Exception("Not now button not found")
+            
             self._logger.debug("Not now button clicked")
             
         return InstagramFeautures(self._context, self._timewait)

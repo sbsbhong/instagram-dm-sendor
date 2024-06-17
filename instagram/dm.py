@@ -4,16 +4,27 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 
+#/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]
+
+
 class DMRoom:
     def __init__(self, url: str, element: WebElement) -> None:
         self.url = url
         self._context = element
+
+    @property
+    def is_refusing_stranger(self) -> bool:
+        try:
+            self._context.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[3]')
+            return True
+        except:
+            return False
     
     @property
     def textbox(self) -> Union[WebElement, None]:
+        changeable_div_num = 3 if self.is_refusing_stranger else 2
+        node = f'/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[{changeable_div_num}]/div/div/div[2]/div/div[1]'
         try:
-            node = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]'
-
             return self._context.find_element(By.XPATH, node)
         except:
             return None
@@ -97,6 +108,7 @@ class InstagramDM(InstagramService):
 
         self._wait_element('/html/body/div[2]')
         new_message_btn = self.find_element(self._context, By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/div/div/div/div[1]/div/div[1]/div/div[1]/div[2]/div/div')
+
         if new_message_btn:
             new_message_btn.click()
             self._logger.debug("New message button clicked")
@@ -116,6 +128,10 @@ class InstagramDM(InstagramService):
         self._logger.info("Searched users:" + str(len(searched_users)))
         if not searched_users:
             self._logger.error("No searched users found")
+            close_btn = self.find_element(self._context, By.XPATH, '/html/body/div[6]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[1]/div[2]/div/div')
+
+            if close_btn:
+                close_btn.click()
 
             return self
         
@@ -132,6 +148,7 @@ class InstagramDM(InstagramService):
             
         if not is_found:
             self._logger.error("Recipient not found")
+            self._room = None
             return self
         
         chat_btn = self.find_element(self._context, By.XPATH, '/html/body/div[6]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[4]/div')
@@ -182,13 +199,13 @@ class InstagramDM(InstagramService):
         self._logger.info("Message sent")
 
         return self
-
+    
         
     def send_files(self, files: List[str]) -> Self:
         if not self.room:
             raise Exception("DM room not found. Create a new message first.")
         
-        if not self.room.file_attach_input or not self.room.textbox:
+        if not self.room.file_attach_input:
             raise Exception("File attach input not found")
         
         self.room.file_attach_input.send_keys("\n".join(files))

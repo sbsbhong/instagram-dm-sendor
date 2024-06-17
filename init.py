@@ -41,11 +41,24 @@ if __name__ == "__main__":
     for row in interior_csv:
         interior = InteriorInstagram(row)
         try:
+            dm.wait_random_time()
             dm.new_message(interior.instagram_id)
-            dm.send_messsage(f"안녕하세요, 사장님! 스타트홈 입니다.")
-            dm.send_messsage(f"네이버 검색중에 {interior.name}의 블로그를 보게 되어 연락드렸습니다.")
-            dm.send_messsage(f"혹시 IoT 기기들을 활용한 스마트홈 구축도 하고 계시는지요?")
-            dm.close_room()
+
+            if not dm.room:
+                continue
+
+            if dm.room.is_refusing_stranger:
+                dm.send_messsage(
+f"""
+안녕하세요, 사장님! 스타트홈 입니다. 네이버 검색중에 '{interior.name}' 블로그를 보게 되어 연락드렸습니다. 혹시 IoT 기기들을 활용한 스마트홈 구축도 하고 계시는지요?
+"""
+                ).close_room()
+            else:
+                dm.send_messsage(f"안녕하세요, 사장님! 스타트홈 입니다.")\
+                    .send_messsage(f"네이버 검색중에 {interior.name}의 블로그를 보게 되어 연락드렸습니다.")\
+                    .send_messsage(f"혹시 IoT 기기들을 활용한 스마트홈 구축도 하고 계시는지요?")\
+                    .close_room()
+                
             dm.wait_random_time()
         except Exception as e:
             print("Error: ", e, interior)
